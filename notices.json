@@ -1,0 +1,65 @@
+[
+  {
+    "time": "2026-03-18",
+    "content": "关于2026年春季运动会报名的通知",
+    "deadline": "2026-03-25",
+    "channel": "OA群",
+    "type": "normal"
+  },
+  {
+    "time": "2026-03-17",
+    "content": "重要通知：周五下午3点召开部门会议",
+    "deadline": "2026-03-20",
+    "channel": "微信群",
+    "type": "urgent"
+  },
+  {
+    "time": "2026-03-16",
+    "content": "新系统上线培训安排",
+    "deadline": "2026-03-30",
+    "channel": "定点通知",
+    "type": "info"
+  },
+  {
+    "time": "2026-03-15",
+    "content": "关于办公区域安全检查的通知",
+    "deadline": "2026-03-22",
+    "channel": "邮件通知",
+    "type": "normal"
+  },
+  {
+    "time": "2026-03-14",
+    "content": "年度体检通知",
+    "deadline": "2026-04-15",
+    "channel": "OA群",
+    "type": "info"
+  },
+  {
+    "time": "2026-03-13",
+    "content": "关于调整作息时间的通知，4月1日起执行夏季作息时间",
+    "deadline": "2026-03-31",
+    "channel": "微信群",
+    "type": "normal"
+  },
+  {
+    "time": "2026-03-12",
+    "content": "网络安全培训通知",
+    "deadline": "2026-03-28",
+    "channel": "定点通知",
+    "type": "urgent"
+  },
+  {
+    "time": "2026-03-11",
+    "content": "图书馆新书上架通知",
+    "deadline": "2026-04-30",
+    "channel": "邮件通知",
+    "type": "info"
+  },
+  {
+    "time": "2026-03-10",
+    "content": "清明节放假通知",
+    "deadline": "2026-04-05",
+    "channel": "OA群",
+    "type": "normal"
+  }
+]

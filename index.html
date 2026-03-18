@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>通知公告展示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* 密码锁屏 */
+        .lock-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #0a1929 0%, #1a2332 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .lock-screen.hidden {
+            display: none;
+        }
+        
+        .lock-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px 60px;
+            border-radius: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .lock-box h2 {
+            color: #ffd700;
+            font-size: 1.8em;
+            margin-bottom: 30px;
+        }
+        
+        .lock-box input {
+            width: 200px;
+            padding: 15px 20px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            text-align: center;
+            outline: none;
+            margin-bottom: 20px;
+        }
+        
+        .lock-box input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .lock-box input:focus {
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+        
+        .lock-box button {
+            padding: 12px 40px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            background: #ffd700;
+            color: #0a1929;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .lock-box button:hover {
+            background: #ffed4a;
+            transform: scale(1.05);
+        }
+        
+        .lock-error {
+            color: #ff6b6b;
+            margin-top: 15px;
+            font-size: 0.9em;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .lock-error.show {
+            opacity: 1;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a1929 0%, #1a2332 100%);
+            color: #ffffff;
+            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+            min-height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+        
+        .container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 30px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 15px 0;
+            border-bottom: 3px solid #ffd700;
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            color: #ffd700;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+            letter-spacing: 6px;
+        }
+        
+        /* 页面容器 */
+        .pages-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.6s ease-in-out;
+            padding: 10px 0;
+            align-content: flex-start;
+        }
+        
+        .page.centered {
+            justify-content: center;
+        }
+        
+        .page.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .page.exit {
+            opacity: 0;
+            transform: translateX(-100%);
+        }
+        
+        /* 通知卡片 */
+        .notice-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-left: 5px solid #444;
+            padding: 15px 20px;
+            border-radius: 0 12px 12px 0;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            backdrop-filter: blur(5px);
+            min-height: 70px;
+            max-height: 90px;
+            flex-shrink: 0;
+        }
+        
+        .notice-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.4), transparent);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .notice-card.urgent {
+            border-left-color: #ff4444;
+            background: rgba(255, 68, 68, 0.12);
+        }
+        
+        .notice-card.urgent::after {
+            content: '⚠️';
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            font-size: 1.5em;
+            animation: blink 1s infinite;
+        }
+        
+        .notice-card.normal {
+            border-left-color: #44ff44;
+            background: rgba(68, 255, 68, 0.08);
+        }
+        
+        .notice-card.info {
+            border-left-color: #4488ff;
+            background: rgba(68, 136, 255, 0.08);
+        }
+        
+        /* 发布渠道标签 */
+        .notice-channel {
+            flex-shrink: 0;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: bold;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        .channel-oa {
+            background: rgba(255, 165, 0, 0.3);
+            color: #ffb84d;
+            border: 1px solid rgba(255, 165, 0, 0.5);
+        }
+        
+        .channel-wechat {
+            background: rgba(7, 193, 96, 0.3);
+            color: #4ade80;
+            border: 1px solid rgba(7, 193, 96, 0.5);
+        }
+        
+        .channel-direct {
+            background: rgba(147, 51, 234, 0.3);
+            color: #c084fc;
+            border: 1px solid rgba(147, 51, 234, 0.5);
+        }
+        
+        .channel-email {
+            background: rgba(59, 130, 246, 0.3);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.5);
+        }
+        
+        /* 通知主体 */
+        .notice-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .notice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .notice-time {
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 1em;
+        }
+        
+        .notice-deadline {
+            color: #ff9999;
+            font-size: 0.9em;
+        }
+        
+        .notice-content {
+            font-size: 1.1em;
+            line-height: 1.4;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #888;
+        }
+        
+        .empty-state .icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+        
+        .empty-state p {
+            font-size: 1.5em;
+        }
+        
+        /* 底部 */
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            margin-top: 15px;
+            flex-shrink: 0;
+        }
+        
+        .footer-left {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .footer-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #888;
+        }
+        
+        .footer-item .value {
+            color: #ffd700;
+            font-weight: bold;
+        }
+        
+        /* 页码指示器 */
+        .page-indicator {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .page-dots {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .page-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .page-dot.active {
+            background: #ffd700;
+            transform: scale(1.2);
+        }
+        
+        .page-text {
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        /* 进度条 */
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: #ffd700;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        
+        .footer-wrapper {
+            position: relative;
+        }
+        
+        .footer-wrapper .progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            border-radius: 10px 10px 0 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- 密码锁屏 -->
+    <div class="lock-screen" id="lock-screen">
+        <div class="lock-box">
+            <h2>🔒 请输入访问密码</h2>
+            <input type="password" id="password-input" placeholder="密码" autocomplete="off">
+            <br>
+            <button id="unlock-btn">解锁</button>
+            <p class="lock-error" id="lock-error">密码错误，请重试</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>📢 通知公告</h1>
+        </div>
+        
+        <div class="pages-container" id="pages-container">
+            <!-- 页面将通过JavaScript动态生成 -->
+        </div>
+        
+        <div class="footer-wrapper">
+            <div class="progress-bar" id="progress-bar"></div>
+            <div class="footer">
+                <div class="footer-left">
+                    <div class="footer-item">
+                        <span>🕐 更新:</span>
+                        <span class="value" id="last-update">--</span>
+                    </div>
+                    <div class="footer-item">
+                        <span>📋 共 <span class="value" id="notice-count">0</span> 条</span>
+                    </div>
+                </div>
+                <div class="page-indicator">
+                    <div class="page-dots" id="page-dots"></div>
+                    <span class="page-text" id="page-text">第 1/1 页</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== 密码配置 =====
+        const ACCESS_PASSWORD = 'buaa2026';  // 修改这里设置你的密码
+        
+        // 密码验证
+        const lockScreen = document.getElementById('lock-screen');
+        const passwordInput = document.getElementById('password-input');
+        const unlockBtn = document.getElementById('unlock-btn');
+        const lockError = document.getElementById('lock-error');
+        
+        // 检查是否已解锁（sessionStorage）
+        if (sessionStorage.getItem('unlocked') === 'true') {
+            lockScreen.classList.add('hidden');
+        }
+        
+        function tryUnlock() {
+            const inputPassword = passwordInput.value;
+            if (inputPassword === ACCESS_PASSWORD) {
+                sessionStorage.setItem('unlocked', 'true');
+                lockScreen.classList.add('hidden');
+            } else {
+                lockError.classList.add('show');
+                passwordInput.value = '';
+                passwordInput.focus();
+                setTimeout(() => lockError.classList.remove('show'), 2000);
+            }
+        }
+        
+        unlockBtn.addEventListener('click', tryUnlock);
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') tryUnlock();
+        });
+        
+        // ===== 配置 =====
+        const CONFIG = {
+            refreshInterval: 30 * 1000,  // 数据刷新间隔：30秒
+            pageInterval: 10 * 1000,     // 翻页间隔：10秒
+            dataUrl: 'notices.json'       // 数据文件路径
+        };
+        
+        // 渠道映射
+        const CHANNEL_MAP = {
+            'OA群': { class: 'channel-oa', label: 'OA群' },
+            '微信群': { class: 'channel-wechat', label: '微信群' },
+            '定点通知': { class: 'channel-direct', label: '定点通知' },
+            '邮件通知': { class: 'channel-email', label: '邮件通知' }
+        };
+        
+        // 状态
+        let notices = [];
+        let pages = [];
+        let currentPage = 0;
+        let itemsPerPage = 5;
+        let pageTimer = null;
+        let progressTimer = null;
+        let progressValue = 0;
+        
+        function getNoCacheUrl(url) {
+            const separator = url.includes('?') ? '&' : '?';
+            return `${url}${separator}_t=${Date.now()}`;
+        }
+        
+        function calculateItemsPerPage() {
+            const height = window.innerHeight;
+            const availableHeight = height - 160;
+            itemsPerPage = Math.max(3, Math.min(10, Math.floor(availableHeight / 80)));
+            console.log(`屏幕高度: ${height}px, 每页显示: ${itemsPerPage} 条`);
+        }
+        
+        function getChannelInfo(channel) {
+            return CHANNEL_MAP[channel] || { class: 'channel-oa', label: channel || '未知' };
+        }
+        
+        async function loadNotices() {
+            try {
+                const response = await fetch(getNoCacheUrl(CONFIG.dataUrl));
+                if (response.ok) {
+                    const data = await response.json();
+                    const now = new Date();
+                    now.setHours(0, 0, 0, 0);
+                    
+                    notices = data.filter(notice => {
+                        const deadline = new Date(notice.deadline);
+                        deadline.setHours(23, 59, 59, 999);
+                        return deadline >= now;
+                    });
+                    
+                    console.log(`加载了 ${notices.length} 条有效通知`);
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                console.error('加载通知失败:', error);
+                notices = [];
+            }
+            
+            calculateItemsPerPage();
+            paginateNotices();
+            renderPages();
+            updateFooter();
+        }
+        
+        function paginateNotices() {
+            pages = [];
+            if (notices.length === 0) return;
+            
+            for (let i = 0; i < notices.length; i += itemsPerPage) {
+                pages.push(notices.slice(i, i + itemsPerPage));
+            }
+            
+            console.log(`共 ${notices.length} 条通知，分为 ${pages.length} 页`);
+        }
+        
+        function renderPages() {
+            const container = document.getElementById('pages-container');
+            const dotsContainer = document.getElementById('page-dots');
+            
+            stopAutoPage();
+            
+            if (notices.length === 0) {
+                container.innerHTML = `
+                    <div class="page active">
+                        <div class="empty-state">
+                            <span class="icon">📭</span>
+                            <p>暂无有效通知</p>
+                        </div>
+                    </div>
+                `;
+                dotsContainer.innerHTML = '';
+                document.getElementById('page-text').textContent = '无通知';
+                return;
+            }
+            
+            container.innerHTML = pages.map((page, pageIndex) => `
+                <div class="page ${pageIndex === 0 ? 'active' : ''} ${page.length <= 3 ? 'centered' : ''}" data-page="${pageIndex}">
+                    ${page.map(notice => {
+                        const channelInfo = getChannelInfo(notice.channel);
+                        return `
+                        <div class="notice-card ${notice.type || 'normal'}">
+                            <div class="notice-channel ${channelInfo.class}">${channelInfo.label}</div>
+                            <div class="notice-body">
+                                <div class="notice-header">
+                                    <span class="notice-time">📅 ${notice.time || '未知时间'}</span>
+                                    <span class="notice-deadline">⏰ 截止: ${notice.deadline || '未知'}</span>
+                                </div>
+                                <div class="notice-content">${notice.content || '无内容'}</div>
+                            </div>
+                        </div>
+                    `}).join('')}
+                </div>
+            `).join('');
+            
+            dotsContainer.innerHTML = pages.map((_, index) => `
+                <div class="page-dot ${index === 0 ? 'active' : ''}" data-page="${index}"></div>
+            `).join('');
+            
+            dotsContainer.querySelectorAll('.page-dot').forEach(dot => {
+                dot.addEventListener('click', () => {
+                    goToPage(parseInt(dot.dataset.page));
+                });
+            });
+            
+            currentPage = 0;
+            updatePageText();
+            
+            if (pages.length > 1) {
+                startAutoPage();
+            }
+        }
+        
+        function goToPage(pageIndex) {
+            if (pageIndex === currentPage || pageIndex < 0 || pageIndex >= pages.length) return;
+            
+            const allPages = document.querySelectorAll('.page');
+            const allDots = document.querySelectorAll('.page-dot');
+            
+            allPages[currentPage].classList.remove('active');
+            allPages[currentPage].classList.add('exit');
+            allDots[currentPage].classList.remove('active');
+            
+            progressValue = 0;
+            document.getElementById('progress-bar').style.width = '0%';
+            
+            setTimeout(() => {
+                allPages.forEach(p => p.classList.remove('exit'));
+                allPages[pageIndex].classList.add('active');
+                allDots[pageIndex].classList.add('active');
+            }, 100);
+            
+            currentPage = pageIndex;
+            updatePageText();
+        }
+        
+        function nextPage() {
+            const nextIndex = (currentPage + 1) % pages.length;
+            goToPage(nextIndex);
+        }
+        
+        function updatePageText() {
+            document.getElementById('page-text').textContent = `第 ${currentPage + 1}/${pages.length} 页`;
+        }
+        
+        function startAutoPage() {
+            progressValue = 0;
+            
+            progressTimer = setInterval(() => {
+                progressValue += 100 / (CONFIG.pageInterval / 100);
+                document.getElementById('progress-bar').style.width = `${Math.min(progressValue, 100)}%`;
+            }, 100);
+            
+            pageTimer = setInterval(nextPage, CONFIG.pageInterval);
+        }
+        
+        function stopAutoPage() {
+            if (pageTimer) {
+                clearInterval(pageTimer);
+                pageTimer = null;
+            }
+            if (progressTimer) {
+                clearInterval(progressTimer);
+                progressTimer = null;
+            }
+            progressValue = 0;
+            document.getElementById('progress-bar').style.width = '0%';
+        }
+        
+        function updateFooter() {
+            const now = new Date();
+            document.getElementById('last-update').textContent = now.toLocaleTimeString('zh-CN');
+            document.getElementById('notice-count').textContent = notices.length;
+        }
+        
+        window.addEventListener('resize', () => {
+            const oldItemsPerPage = itemsPerPage;
+            calculateItemsPerPage();
+            
+            if (oldItemsPerPage !== itemsPerPage) {
+                paginateNotices();
+                renderPages();
+            }
+        });
+        
+        loadNotices();
+        setInterval(loadNotices, CONFIG.refreshInterval);
+        
+        if ('wakeLock' in navigator) {
+            navigator.wakeLock.request('screen').catch(err => {
+                console.log('无法保持屏幕唤醒:', err);
+            });
+        }
+    </script>
+</body>
+</html>
