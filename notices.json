@@ -1,65 +1,65 @@
 [
   {
     "time": "2026-03-18",
-    "content": "关于2026年春季运动会报名的通知",
+    "content": "鍏充簬2026骞存槬瀛ｈ繍鍔ㄤ細鎶ュ悕鐨勯€氱煡",
     "deadline": "2026-03-25",
-    "channel": "OA群",
+    "channel": "OA缇?,
     "type": "normal"
   },
   {
     "time": "2026-03-17",
-    "content": "重要通知：周五下午3点召开部门会议",
+    "content": "閲嶈閫氱煡锛氬懆浜斾笅鍗?鐐瑰彫寮€閮ㄩ棬浼氳",
     "deadline": "2026-03-20",
-    "channel": "微信群",
+    "channel": "寰俊缇?,
     "type": "urgent"
   },
   {
     "time": "2026-03-16",
-    "content": "新系统上线培训安排",
+    "content": "鏂扮郴缁熶笂绾垮煿璁畨鎺?,
     "deadline": "2026-03-30",
-    "channel": "定点通知",
+    "channel": "瀹氱偣閫氱煡",
     "type": "info"
   },
   {
     "time": "2026-03-15",
-    "content": "关于办公区域安全检查的通知",
+    "content": "鍏充簬鍔炲叕鍖哄煙瀹夊叏妫€鏌ョ殑閫氱煡",
     "deadline": "2026-03-22",
-    "channel": "邮件通知",
+    "channel": "閭欢閫氱煡",
     "type": "normal"
   },
   {
     "time": "2026-03-14",
-    "content": "年度体检通知",
+    "content": "骞村害浣撴閫氱煡",
     "deadline": "2026-04-15",
-    "channel": "OA群",
+    "channel": "OA缇?,
     "type": "info"
   },
   {
     "time": "2026-03-13",
-    "content": "关于调整作息时间的通知，4月1日起执行夏季作息时间",
+    "content": "鍏充簬璋冩暣浣滄伅鏃堕棿鐨勯€氱煡锛?鏈?鏃ヨ捣鎵ц澶忓浣滄伅鏃堕棿",
     "deadline": "2026-03-31",
-    "channel": "微信群",
+    "channel": "寰俊缇?,
     "type": "normal"
   },
   {
     "time": "2026-03-12",
-    "content": "网络安全培训通知",
+    "content": "缃戠粶瀹夊叏鍩硅閫氱煡",
     "deadline": "2026-03-28",
-    "channel": "定点通知",
+    "channel": "瀹氱偣閫氱煡",
     "type": "urgent"
   },
   {
     "time": "2026-03-11",
-    "content": "图书馆新书上架通知",
+    "content": "鍥句功棣嗘柊涔︿笂鏋堕€氱煡",
     "deadline": "2026-04-30",
-    "channel": "邮件通知",
+    "channel": "閭欢閫氱煡",
     "type": "info"
   },
   {
     "time": "2026-03-10",
-    "content": "清明节放假通知",
+    "content": "娓呮槑鑺傛斁鍋囬€氱煡",
     "deadline": "2026-04-05",
-    "channel": "OA群",
+    "channel": "OA缇?,
     "type": "normal"
   }
 ]
